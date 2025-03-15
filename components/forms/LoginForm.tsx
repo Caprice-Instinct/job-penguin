@@ -1,4 +1,4 @@
-import { Button } from "../ui/button";
+import { auth, signIn } from "@/app/utils/auth";
 import {
   Card,
   CardContent,
@@ -9,6 +9,8 @@ import {
 
 import * as React from "react";
 import type { SVGProps } from "react";
+import { GeneralSubmitButton } from "../general/SubmitButton";
+import { redirect } from "next/navigation";
 const Github = (props: SVGProps<SVGSVGElement>) => (
   <svg
     viewBox="0 0 256 250"
@@ -51,7 +53,12 @@ const Google = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export function LoginForm() {
+export async function LoginForm() {
+  const session = await auth();
+
+  if (session?.user) {
+    return redirect("/");
+  }
   return (
     <div className="flex flex-col gap-6">
       <Card>
@@ -63,23 +70,36 @@ export function LoginForm() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">
-            <form>
-              <Button className="w-full" variant="outline">
-                <Github className="size-4" />
-                Login with GitHub
-              </Button>
+            <form
+              action={async () => {
+                "use server";
+
+                await signIn("github", {
+                  redirectTo: "/",
+                });
+              }}
+            >
+              <GeneralSubmitButton
+                text="Login with GitHub"
+                variant="outline"
+                width="w-full"
+                icon={<Github />}
+              />
             </form>
             <form>
-              <Button className="w-full" variant="outline">
-                <Google className="size-4" />
-                Login with Google
-              </Button>
+              <GeneralSubmitButton
+                text="Login with Google"
+                variant="outline"
+                width="w-full"
+                icon={<Google />}
+              />
             </form>
           </div>
         </CardContent>
       </Card>
       <div className="text-center text-xs text-balance text-gray-500">
-        By clicking Continue, you agree to our terms and conditions, and privacy policy.
+        By clicking Continue, you agree to our terms and conditions, and privacy
+        policy.
       </div>
     </div>
   );
