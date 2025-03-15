@@ -2,6 +2,7 @@ import Link from "next/link";
 import Logo from "@/public/logo.png";
 import Image from "next/image";
 import { Button } from "../ui/button";
+import { ThemeToggle } from "./ThemeToggle";
 
 export default function Navbar() {
   return (
@@ -12,9 +13,12 @@ export default function Navbar() {
           🐧Job<span className="text-primary">Penguin</span>
         </h1>
       </Link>
-      <Button>
+      <div className="flex items-center gap-4">
+        <ThemeToggle />
+        <Button>
         Log in
       </Button>
+      </div>
     </nav>
   );
 }
