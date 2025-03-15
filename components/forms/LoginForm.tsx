@@ -86,7 +86,15 @@ export async function LoginForm() {
                 icon={<Github />}
               />
             </form>
-            <form>
+            <form
+              action={async () => {
+                "use server";
+
+                await signIn("google", {
+                  redirectTo: "/",
+                });
+              }}
+            >
               <GeneralSubmitButton
                 text="Login with Google"
                 variant="outline"
