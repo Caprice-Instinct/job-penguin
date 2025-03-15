@@ -28,7 +28,7 @@ export function GeneralSubmitButton({
 }: GeneralSubmitButtonProps) {
   const { pending } = useFormStatus();
   return (
-    <Button variant={variant} className={width}>
+    <Button variant={variant} className={width} disabled={pending}>
       {pending ? (
         <>
           <Loader className="size-4 animate-spin" />
