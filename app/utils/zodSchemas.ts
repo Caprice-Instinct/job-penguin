@@ -10,3 +10,9 @@ export const companySchema = z.object({
   website: z.string().url("Please provide a valid URL"),
   xAccount: z.string().optional(),
 });
+
+export const jobSeekerSchema = z.object({
+  name: z.string().min(5, "Name should be at least 5 characters"),
+  about: z.string().min(10, "Please provide more information about yourself"),
+  resume: z.string().min(1, "Please provide your resume"),
+});
