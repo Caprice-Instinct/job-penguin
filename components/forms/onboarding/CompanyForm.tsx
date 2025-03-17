@@ -23,6 +23,11 @@ import {
 import { countryList } from "@/app/utils/countriesList";
 import { Textarea } from "@/components/ui/textarea";
 import { UploadDropzone } from "@/components/general/UploadThingReexported";
+import { createCompany } from "@/app/actions";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { XIcon } from "lucide-react";
 
 export function CompanyForm() {
   const form = useForm<z.infer<typeof companySchema>>({
@@ -36,9 +41,23 @@ export function CompanyForm() {
       xAccount: "",
     },
   });
+
+  const [pending, setPending] = useState(false);
+  async function onSubmit(data: z.infer<typeof companySchema>) {
+    try {
+      setPending(true);
+      await createCompany(data);
+    } catch (error) {
+      if (error instanceof Error && error.message !== "NEXT_REDIRECT") {
+        console.error(error.message);
+      }
+    } finally {
+      setPending(false);
+    }
+  }
   return (
     <Form {...form}>
-      <form className="space-y-6">
+      <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
         <div className="grid gird-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -90,7 +109,7 @@ export function CompanyForm() {
           />
         </div>
         <div className="grid gird-cols-1 md:grid-cols-2 gap-6">
-        <FormField
+          <FormField
             control={form.control}
             name="website"
             render={({ field }) => (
@@ -103,7 +122,7 @@ export function CompanyForm() {
               </FormItem>
             )}
           />
-        <FormField
+          <FormField
             control={form.control}
             name="xAccount"
             render={({ field }) => (
@@ -118,40 +137,68 @@ export function CompanyForm() {
           />
         </div>
         <FormField
-            control={form.control}
-            name="about"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>About</FormLabel>
-                <FormControl>
+          control={form.control}
+          name="about"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>About</FormLabel>
+              <FormControl>
                 <Textarea placeholder="Tell us about your company" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="logo"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Company Logo</FormLabel>
-                <FormControl>
-                <UploadDropzone
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="logo"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Company Logo</FormLabel>
+              <FormControl>
+                <div>
+                  {field.value ? (
+                    <div className="relative w-fit">
+                      <Image
+                        src={field.value}
+                        alt="Company Logo"
+                        width={100}
+                        height={100}
+                        className="rounded-lg"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 -right-2"
+                        onClick={()=> field.onChange("")}
+                      >
+                        <XIcon className="size-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <UploadDropzone
                       endpoint="imageUploader"
                       onClientUploadComplete={(res) => {
                         field.onChange(res[0].url);
                       }}
                       onUploadError={() => {
-                        console.error("Something went wrong. Please try again.");
+                        console.error(
+                          "Something went wrong. Please try again."
+                        );
                       }}
                       className="ut-button:bg-primary ut-button:text-white ut-button:hover:bg-primary/90 ut-label:text-muted-foreground ut-allowed-content:text-muted-foreground border-primary"
                     />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  )}
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full" disabled={pending}>
+          {pending ? "Submitting" : "Continue"}
+        </Button>
       </form>
     </Form>
   );
